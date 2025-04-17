@@ -1,0 +1,143 @@
+// const Dashboard = () => {
+//     return (
+      
+//         <View style={styles.container}>
+//           <ScrollView>
+
+//             <View style={styles.topBar}>
+//                 <Text style={styles.topBarText}>Dashboard</Text>
+//             </View>
+
+//             <View style={styles.calendar}>
+//                 <Text style={styles.calendarText}>Calendar Placeholder</Text>
+//             </View>
+            
+//             <View style={styles.card_top}><Text style={styles.cardText}>Today's Workout</Text></View>
+//             <View style={styles.card_two}>
+//             <View style={styles.card}><Text style={styles.cardText}>Yesterday's Workout</Text></View>
+//             <View style={styles.card}><Text style={styles.cardText}>Tomorrow's Workout</Text></View>
+//             </View>
+//             <FlatCards/>
+//             </ScrollView>
+//             <View style={styles.bottomNav}>
+//                 <TouchableOpacity style={styles.navItem}>
+//                 <Image
+//           source={require('./src/assets/Images/dashboard.png')}
+//           style={styles.icon_dashboard}
+//         />
+//                 </TouchableOpacity>
+//                 <TouchableOpacity style={styles.navItem}>
+//                 <Image
+//           source={require('./src/assets/Images/diet.png')}
+//           style={styles.icon}
+//         />
+//                 </TouchableOpacity>
+//                 <TouchableOpacity style={styles.navItem}>
+//                 <Image
+//           source={require('./src/assets/Images/progress.png')}
+//           style={styles.icon}
+//         />
+//                 </TouchableOpacity>
+                
+//             </View>
+//         </View>
+//     );
+// };
+
+// const styles = StyleSheet.create({
+//     container: {
+//         flex: 1,
+//         backgroundColor: '#f9f9f9',
+//     },
+//     topBar: {
+//         backgroundColor: '#65AFFF',
+//         padding: 15,
+//         alignItems: 'center',
+//     },
+//     topBarText: {
+//         color: 'white',
+//         fontSize: 24,
+//         fontWeight: 'bold',
+//     },
+//     calendar: {
+//         margin: 20,
+//         height: 200,
+//         borderWidth: 1,
+//         borderColor: '#ccc',
+//         justifyContent: 'center',
+//         alignItems: 'center',
+//         backgroundColor: '#fff',
+//     },
+//     calendarText: {
+//         fontSize: 18,
+//         color: '#666',
+//     }, card_two:{
+//       flexDirection: 'row',
+//       alignItems:'center',
+//       justifyContent : 'space-around'
+//     },
+//     card_top:{
+//       marginHorizontal: 20,
+//       marginVertical: 10,
+//       padding: 15,
+//       height: 150,
+//       borderWidth: 1,
+//       borderColor: '#ddd',
+//       borderRadius: 8,
+//       backgroundColor: '#fff',
+//       shadowColor: '#000',
+//       shadowOpacity: 0.1,
+//       shadowRadius: 5,
+//       elevation: 3,
+//     },
+//     card: {
+//         marginHorizontal: 5,
+//         height: 150,
+//         width:150,
+//         marginVertical: 10,
+//         padding: 15,
+//         borderWidth: 1,
+//         borderColor: '#ddd',
+//         borderRadius: 8,
+//         backgroundColor: '#fff',
+//         shadowColor: '#000',
+//         shadowOpacity: 0.1,
+//         shadowRadius: 5,
+//         elevation: 3,
+//     },
+//     cardText: {
+//         fontSize: 18,
+//         color: '#333',
+//         textAlign: 'center',
+//     },
+//     bottomNav: {
+        
+//         flexDirection: 'row',
+//         justifyContent: 'space-around',
+//         backgroundColor: '#2DC7FF',
+//         height:70,
+//         padding:5,
+//     },
+//     navItem: {
+//         alignItems: 'center',
+//     },
+//     navText: {
+//         color: 'white',
+//         fontSize: 16,
+//     },
+//     active: {
+//         fontWeight: 'bold',
+//         textDecorationLine: 'underline',
+//     }, 
+//     icon: {
+//         width: 45,
+//         height: 45,
+//       },
+    
+//     icon_dashboard: {
+//         width: 60,
+//         height: 60,
+//       },
+// });
+
+// export default Dashboard;
