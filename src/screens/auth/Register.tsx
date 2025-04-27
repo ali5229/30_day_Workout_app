@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select'; 
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../../firebase/firebaseConfig';
+import {authService} from '../../services/authService';
 
 const CalculateBmi = (weight: string, height: string): string | null => {
   const weightNum = parseFloat(weight);
@@ -48,38 +46,39 @@ const RegisterPage = ({ navigation }: { navigation: any }) => {
     { label: 'Six', value: '6' },
   ];
  
-  const bmi = CalculateBmi(weight, height);
 
   const handleRegister = async () => {
     if (!email || !password || !age || !height || !weight || !diabetes || !experience || !gym_equipment) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
-     setLoading(true);
+  
+    setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      await setDoc(doc(db, 'users', user.uid), {
+      const userData = await authService.signUp({
         email,
-        age,
-        height,
-        weight,
+        password: password,
+        age: parseInt(age),
+        height: parseInt(height),
+        weight: parseInt(weight),
         diabetes,
         experience,
-        gym_equipment,
         workoutdays,
+        gym_equipment,
       });
-
+  
+      const bmi = CalculateBmi(weight, height);
+  
       navigation.navigate('GoalSelection', {
-        userId:user.uid,
-        bmi: bmi
+        userData,
+        bmi,
       });
     } catch (error: any) {
       Alert.alert('Registration Failed', error.message);
     }
     setLoading(false);
   };
+  
 
   return (
     <ScrollView>

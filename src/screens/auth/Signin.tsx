@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityIndicator,View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../../firebase/firebaseConfig'
-
+import {useAuth} from '../../context/Auth';
 
 const Signin = ({ navigation }: { navigation: any }) => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const auth = useAuth();
+  
 
   const handleSignIn = async () => {
 
@@ -16,13 +16,13 @@ const Signin = ({ navigation }: { navigation: any }) => {
       return;
     }
      setLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate('HomeScreen');
+     try {
+       await auth.signIn(email, password);
     } catch (error: any) {
       Alert.alert('Sign In Failed', error.message);
+    } finally {
+      setLoading(false);
     }
-     setLoading(false);
   };
   return (
     <View style={styles.container}>
@@ -66,7 +66,7 @@ const Signin = ({ navigation }: { navigation: any }) => {
      )
     }
 
-      <TouchableOpacity onPress={() => navigation.navigate('RegisterScreen')}>
+      <TouchableOpacity onPress={() => navigation.navigate('Register')}>
         <Text style={styles.registerText}>Don't have an account? Register</Text>
       </TouchableOpacity>
     </View>

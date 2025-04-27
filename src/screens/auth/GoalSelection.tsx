@@ -3,21 +3,22 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } fr
 import RNPickerSelect from 'react-native-picker-select';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase/firebaseConfig';
+import { useAuth } from '../../context/Auth';
 
 
 const GoalSelection = ({route , navigation}:{route:any, navigation:any}) => {
-  const {userId,bmi} = route.params || {};
-  console.log('goalselection  :',userId)
+  const { userData, bmi } = route.params || {};
+  const { userId } = userData || {};
   const [goal,setGoal] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  
+  const { setAuthData } = useAuth();
   const recommendGoal = (bmi:number) => {
     if(bmi < 18.5) return 'Gain Muscle';  
     else if (bmi >=18.5 && bmi <=24.9 ) return 'Remain Fit';
     else return 'Lose Weight';
   }
 
-  const recommendedGoal = recommendGoal(parseFloat(bmi));
+  const recommendedGoal = bmi ? recommendGoal(parseFloat(bmi)) : 'N/A';
 
   const goalOptions = [
     { label: 'Lose Weight', value: 'Lose Weight' },
@@ -29,6 +30,7 @@ const GoalSelection = ({route , navigation}:{route:any, navigation:any}) => {
     setLoading(true);
     if(!goal){
       Alert.alert('Error', 'Please Select a Goal');
+      setLoading(false);
       return;
     }
      try{
@@ -36,14 +38,15 @@ const GoalSelection = ({route , navigation}:{route:any, navigation:any}) => {
         goal, bmi
       });
 
-      navigation.navigate('HomeScreen',{
-        userId
-      }
-      );
+      setAuthData({
+        userId,
+      });
+       
      } catch(error:any){
         Alert.alert('Error', error.message);
+     } finally{
+        setLoading(false);
      }
-     setLoading(false);
   };
 
 
