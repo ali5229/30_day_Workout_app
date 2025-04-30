@@ -1,10 +1,10 @@
-    import { Alert, Text, View, ActivityIndicator,ScrollView, TouchableOpacity, Modal, Image, StyleSheet } from "react-native";
-    import firestore from '@react-native-firebase/firestore';
+    import { Alert, Text, View, ImageBackground,ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+    import firestore, { Timestamp } from '@react-native-firebase/firestore';
     import React, { useState, useEffect } from 'react';
     import { useAuth } from "../../context/Auth";
     import asyncStorage from "@react-native-async-storage/async-storage";
-
-
+    import {LottieAnimation} from "../../components/lottieAnimation";
+    
     interface Exercise {
         name: string;
         instruction: string;
@@ -19,51 +19,19 @@
         }>;
     }
 
-
-
-    const Dashboard = ({route}:{route:any}) => {
+    const Dashboard = ({route , navigation}:{route:any, navigation:any}) => {
             const { authData } = useAuth();
             const userId = authData?.userId;
-            console.log('The User ID is ',userId);
             const [user, setUser] = useState<any>(null);
             const [loading, setLoading] = useState(true);
             const [exercises, setExercises] = useState<Exercise[]>([]);
             const [workoutPlan, setWorkoutPlan] = useState<WorkoutDay[]>([]);
-            const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-            const [modalVisible, setModalVisible] = useState(false);
+            const [planGeneratedAt, setPlanGeneratedAt] = useState<Date | null>(null);
+            const [todayWorkoutDay, setTodayWorkoutDay] = useState<number | null>(null);
+            const [selectedDay, setSelectedDay] = useState<number | null>(null);            
             const [currentWeek, setCurrentWeek] = useState(1);
             const [weeksInMonth] = useState(4);
             
-            // useEffect(() => {
-            //     const initialize = async () => {
-            //         if (!userId) {
-            //             Alert.alert('Error', 'User ID missing');
-            //             setLoading(false);
-            //             return;
-            //         }
-            
-            //         try {
-            //             setWorkoutPlan([]); 
-            //             const userData = await firestore().collection('users').doc(userId).get();
-            //             if (userData.exists) {
-            //                 const userDataObj = userData.data();
-            //                 setUser(userDataObj);
-                            
-            //                 const exerciseList = await fetchExercises();
-            //                 await generateWorkoutPlan(userDataObj, exerciseList);
-            //             } else {
-            //                 Alert.alert('Error', 'User Not Found');
-            //             }
-            //         } catch (error: any) {
-            //             Alert.alert('Error', error.message);
-            //         }
-            //     };
-            
-            //     initialize();
-            // }, [userId]);
-
-
-
             useEffect(() => {
                 const fetchPlan = async()=>{
 
@@ -71,27 +39,39 @@
                         Alert.alert('Error', 'User ID missing');
                         setLoading(false);
                         return;
-                    }
-
-                    try{
-
+                    }try{
                         const localData = await asyncStorage.getItem('workoutPlan');
-                        if(localData){
+                        const dateString = await asyncStorage.getItem('planGeneratedAt');
+                        if(localData && dateString){
                             console.log('Loaded from local storage:', localData);
+                            const parsedDate = new Date(dateString);
+                            setPlanGeneratedAt(parsedDate);
+                            const today = new Date();
+                            const diffInTime = today.getTime() - parsedDate.getTime();
+                            const dayNumber = Math.min(30, Math.max(1, Math.floor(diffInTime / (1000 * 3600 * 24)) + 1));
+                            setTodayWorkoutDay(dayNumber);
                             setWorkoutPlan(JSON.parse(localData));
                             setLoading(false);
                             return;
                         }
-
                         const userDoc = await firestore().collection('users').doc(userId).get();
                         if(userDoc.exists){
                             const userDataObj = userDoc.data();
                             setUser(userDataObj);
                             const firestoreData = userDoc.data()?.workoutPlan;
+                            const planGeneratedAt = userDoc.data()?.planGeneratedAt?.toDate?.() ?? new Date();
                             if(firestoreData){
                                 console.log('Loaded from Firestore:');
                                 setWorkoutPlan(firestoreData);
+                                setPlanGeneratedAt(planGeneratedAt);
+                                const today = new Date();
+                                const diffInTime = today.getTime() - planGeneratedAt.getTime();
+                                const dayNumber = Math.min(30, Math.max(1, Math.floor(diffInTime / (1000 * 3600 * 24)) + 1));
+
+                                setTodayWorkoutDay(dayNumber);
                                 await asyncStorage.setItem('workoutPlan', JSON.stringify(firestoreData));
+                                await asyncStorage.setItem('planGeneratedAt', planGeneratedAt.toISOString());
+                                
                                 setLoading(false);
                                 return;
                             } else{
@@ -112,7 +92,6 @@
                 };
                 fetchPlan();
             }, [authData]);
-
 
             const fetchExercises = async () => {
                 try {
@@ -138,10 +117,12 @@
             const monthPlan = await generateMonthlyPlan(userData, exerciseList);
             setWorkoutPlan(monthPlan);
             await asyncStorage.setItem('workoutPlan', JSON.stringify(monthPlan));
+            await asyncStorage.setItem('planGeneratedAt', new Date().toISOString());
                         await firestore().collection('users').doc(userId).set({
-                            workoutPlan: monthPlan
+                            workoutPlan: monthPlan,
+                            planGeneratedAt: Timestamp.now()
                         }, { merge: true });
-
+                        setTodayWorkoutDay(1);
 
         } catch (error) {
             console.error('Error in generateWorkoutPlan:', error);
@@ -151,22 +132,19 @@
         }
     };
 
-
             const generateMonthlyPlan = async (userData: any, exerciseList: Exercise[]) => {
         try {
             const exerciseNames = exerciseList.map(e => e.name).join(', ');
             const totalDays = 30;
             const restDaysPerWeek = 7-userData.workoutdays;
-        
-
             const prompt = `
     Generate a 28 day workout plan for a user with the following profile:
 
     - Age: ${userData.age}
     - BMI: ${userData.bmi}
     - Experience: ${userData.experience}
-    - Equipment: ${userData.gym_equipment} 
-    - Has Type 1 Diabetes: ${userData.diabetes}
+    - Equipment Availability: ${userData.gym_equipment} 
+    - Has Type 1 Diabetes?: ${userData.diabetes}
     - Goal: ${userData.goal}
     - Workout Days per Week: ${userData.workoutdays}
     - Desired Rest Days per Week: ${restDaysPerWeek}
@@ -179,7 +157,7 @@
     - Each day format: {"day": number, "exercises": [{"name": string, "sets": number, "reps": number}]}
     - For rest days: {"day": number, "exercises": []}
     - Ensure each day has atleast 6 different exercises.
-    - Return ONLY the JSON array. DO NOT add code blocks, explanations, or markdown formatting.
+    Respond ONLY with the JSON array without any additional text, title, comment, explanation, greeting, or closing remark. Your response must begin directly with the '[' character.
     `.trim();
 
             const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -189,10 +167,10 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: 'gpt-3.5-turbo',
-                    messages: [{ role: 'system', content: "The model will respond like a workout generating algorithem who is given various variables of an individual's health. Such as BMI, if the individual has type 1 diabetes, and what's the goal of the individual. Then model will generated a 30 day workout with strict json response so that the response can be integerated with an app that accepts the json responses then effectively handles responses to be able to display them in proper UI" },{ role: 'user', content: prompt }],
-                    temperature: 0.7,
-                    max_tokens: 4000,
+                    model: 'gpt-4o',
+                    messages: [{ role: 'system', content: "The model will respond like a workout generating algorithm which is given various variables of an individual's health. Such as BMI, if the individual has type 1 diabetes, and what's the goal of the individual. Then model will generated a 28 day workout with strict json response so that the response can be integerated with an app that accepts the json responses then effectively handles responses to be able to display them in proper UI" },{ role: 'user', content: prompt }],
+                    temperature: 0.2,
+                    max_tokens: 4096,
                 }),
             });
             
@@ -226,99 +204,94 @@
             }));
         }
     };
-    
-            
-
-        
-            
-                const handleExercisePress = (exerciseName: string) => {
-                    const exercise = exercises.find(e => e.name === exerciseName);
-                    if (exercise) {
-                        setSelectedExercise(exercise);
-                        setModalVisible(true);
-                    }
-                };
             
                 if (loading) {
                     return (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color="#0000ff" />
-                        </View>
-                    );
-                }
+                        <LottieAnimation/>
+                );
+            }
 
     return (
     <ScrollView style={styles.container}>
                 <View style={styles.content}>
-                    <Text style={styles.header}>30-Day Workout Plan</Text>
-                    
-                    {/* Week selector */}
-                    <View style={styles.weekSelector}>
-                        {Array.from({length: weeksInMonth}, (_, i) => (
-                            <TouchableOpacity 
-                                key={i}
-                                style={[
-                                    styles.weekButton,
-                                    currentWeek === i + 1 && styles.selectedWeek
-                                ]}
-                                onPress={() => setCurrentWeek(i + 1)}
-                            >
-                                <Text style={styles.weekButtonText}>Week {i + 1}</Text>
+            <Text style={styles.header}>30-Day Workout Plan</Text>                
+
+            {/* Week Selector */}
+            {todayWorkoutDay && (
+                <TouchableOpacity   
+                    style={styles.todayCard}
+                    onPress={() => {
+                        const todayWorkout = workoutPlan.find(d => d.day === todayWorkoutDay);
+                        if (todayWorkout) {
+                          navigation.navigate('WorkoutDayScreen', { day: todayWorkout });
+                        }
+                      }}
+                >   <ImageBackground
+                    source={require('../../assets/Images/todayWorkout.jpg')}
+                    style={styles.todayBackground}
+                    imageStyle={styles.backgroundImage}
+                     >
+                    <Text style={styles.todayTitle}>Workout of Today</Text>
+                    <Text style={styles.todayText}>Day {todayWorkoutDay}</Text>
+                    </ImageBackground>
+                </TouchableOpacity>
+            )}
+            <View style={styles.weekSelector}>
+                {Array.from({ length: weeksInMonth }, (_, i) => (
+                    <TouchableOpacity 
+                        key={i}
+                        style={[
+                            styles.weekButton,
+                            currentWeek === i + 1 && styles.selectedWeek
+                        ]}
+                        onPress={() => setCurrentWeek(i + 1)}
+                    >
+                        <Text style={styles.weekButtonText}>Week {i + 1}</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+
+            {/* Workout Days for Current Week */}
+            <View style={styles.weekDaysContainer}>
+                    {workoutPlan
+                        
+                        .filter(day => Math.ceil(day.day / 7) === currentWeek)
+                        .reduce((rows: any[][], day, index) => {
+                             
+                        if (index % 2 === 0) {
+                            rows.push([day]);
+                        } else {
+                            rows[rows.length - 1].push(day);
+                        }
+                        return rows;
+                        }, [])
+                        .map((row, rowIndex) => (
+                        <View key={rowIndex} style={styles.row}>
+                            {row.map(day => ( 
+                            <TouchableOpacity
+                                key={day.day}
+                                style={styles.dayCard}
+                                onPress={() => navigation.navigate('WorkoutDayScreen', { day })}
+                            > 
+                            
+                             
+                             <ImageBackground
+                                source={ day.exercises.length ? require('../../assets/Images/workoutDay.jpg') : require('../../assets/Images/restDay.jpg')}
+                                style={styles.dayCardBackgroud}
+                                imageStyle={styles.backgroundImage}>
+                                <Text style={styles.dayCardTitle}>Day {day.day}</Text>
+                                <Text style={styles.dayCardSubtitle}>
+                                {day.exercises.length ? `${day.exercises.length} Exercises` : 'Rest Day'}
+                                </Text>
+                                </ImageBackground>
                             </TouchableOpacity>
+                            ) )}
+                        </View>
                         ))}
                     </View>
 
-                    {/* Display workout days for current week */}
-                    {workoutPlan
-                        .filter(day => 
-                            Math.ceil(day.day / 7) === currentWeek
-                        )
-                        .map((day) => (
-                            <View key={day.day} style={styles.dayContainer}>
-                                <Text style={styles.dayHeader}>Day {day.day}</Text>
-                                {day.exercises && day.exercises.length > 0 ? (
-                                    day.exercises.map((exercise, index) => (
-                                        <TouchableOpacity 
-                                            key={index}
-                                            style={styles.exerciseItem}
-                                            onPress={() => handleExercisePress(exercise.name)}
-                                        >
-                                            <Text style={styles.exerciseName}>{exercise.name}</Text>
-                                            <Text>Sets: {exercise.sets} | Reps: {exercise.reps}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                ) : (
-                                    <Text style={styles.restDay}>Rest Day</Text>
-                                )}
-                            </View>
-                        ))
-                    }
-                </View> 
-                <Modal
-                    visible={modalVisible}
-                    transparent={true}
-                    animationType="slide"
-                    onRequestClose={() => setModalVisible(false)}
-                >
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalContent}>
-                            <TouchableOpacity 
-                                style={styles.closeButton}
-                                onPress={() => setModalVisible(false)}
-                            >
-                                <Text style={styles.closeButtonText}>×</Text>
-                            </TouchableOpacity>
-                            {selectedExercise && (
-                                <>
-                                    <Text style={styles.modalTitle}>{selectedExercise.name}</Text>
-                                    <Text style={styles.description}>
-                                        {selectedExercise.instruction}
-                                    </Text>
-                                </>
-                            )}
-                        </View>
-                    </View>
-                </Modal>
+        </View>  
+               
             </ScrollView>
         );
     };
@@ -330,74 +303,11 @@
      },
      content: {
          padding: 16,
-     },
-     loadingContainer: {
-         flex: 1,
-         justifyContent: 'center',
-         alignItems: 'center',
-     },
+     }, 
      header: {
          fontSize: 24,
          fontWeight: 'bold',
          marginBottom: 20,
-     },
-     dayContainer: {
-         marginBottom: 20,
-         backgroundColor: 'white',
-         padding: 16,
-         borderRadius: 8,
-         elevation: 2,
-     },
-     dayHeader: {
-         fontSize: 18,
-         fontWeight: 'bold',
-         marginBottom: 10,
-     },
-     exerciseItem: {
-         padding: 12,
-         borderBottomWidth: 1,
-         borderBottomColor: '#eee',
-     },
-     exerciseName: {
-         fontSize: 16,
-         fontWeight: '500',
-     },
-     modalContainer: {
-         flex: 1,
-         justifyContent: 'center',
-         alignItems: 'center',
-         backgroundColor: 'rgba(0,0,0,0.5)',
-     },
-     modalContent: {
-         width: '90%',
-         backgroundColor: 'white',
-         borderRadius: 10,
-         padding: 20,
-         maxHeight: '80%',
-     },
-     modalTitle: {
-         fontSize: 20,
-         fontWeight: 'bold',
-         marginBottom: 15,
-     },
-     exerciseGif: {
-         width: '100%',
-         height: 200,
-         marginBottom: 15,
-     },
-     description: {
-         fontSize: 16,
-         lineHeight: 24,
-     },
-     closeButton: {
-         position: 'absolute',
-         right: 10,
-         top: 10,
-         zIndex: 1,
-     },
-     closeButtonText: {
-         fontSize: 24,
-         fontWeight: 'bold',
      },
      weekSelector: {
         flexDirection: 'row',
@@ -418,13 +328,73 @@
         color: '#333',
         fontWeight: '500',
     },
-    restDay: {
-        fontSize: 16,
-        color: '#666',
-        textAlign: 'center',
-        padding: 20,
-        fontStyle: 'italic',
+    todayCard: {
+        backgroundColor: '#d4f4dd',
+        borderRadius: 12,
+        marginBottom: 12,
+        elevation: 4,
+        height: 200,
+        boxShadow: '10 14px 18px rgba(10, 19, 23, 0.4)',
     },
+    todayBackground: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 12,
+        overflow: 'hidden',
+
+    },
+    backgroundImage:{
+        opacity: 0.8,
+        backgroundColor:'#000',
+    },
+    todayTitle: {
+        fontSize: 25,
+        fontWeight: 'bold',
+        color: 'white',
+        marginLeft: 16,
+        marginTop: 16,
+    },
+    todayText: {
+        fontSize: 20,
+        marginTop: 120,
+        marginLeft: 27,
+        color: 'white',
+    },
+    weekDaysContainer: {
+        marginTop: 16,
+      },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+      },
+    dayCard: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+        marginHorizontal: 4,
+        borderRadius: 12,
+        elevation: 2,
+        height: 300,
+      },
+    dayCardBackgroud:{
+        width: '100%',
+        height: '100%',
+        borderRadius: 12,
+        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },  
+    dayCardTitle: {
+        fontSize: 30,
+        fontWeight: 'bold',
+        color:'white',
+      },
+      
+      dayCardSubtitle: {
+        fontSize: 14,
+        color: 'white',
+        marginTop: 4,
+      },
  });
  
  export default Dashboard;
