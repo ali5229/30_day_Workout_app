@@ -29,7 +29,8 @@
     "react-native-picker-select": "^9.3.1",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.6.0",
-    "react-native-select-dropdown": "^4.0.1"
+    "react-native-select-dropdown": "^4.0.1",
+    "react-native-video": "^6.13.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
