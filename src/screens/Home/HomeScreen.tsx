@@ -218,7 +218,8 @@
 
             {/* Week Selector */}
             {todayWorkoutDay && (
-                <TouchableOpacity   
+                <TouchableOpacity
+                    activeOpacity={0.8}
                     style={styles.todayCard}
                     onPress={() => {
                         const todayWorkout = workoutPlan.find(d => d.day === todayWorkoutDay);
@@ -239,6 +240,7 @@
             <View style={styles.weekSelector}>
                 {Array.from({ length: weeksInMonth }, (_, i) => (
                     <TouchableOpacity 
+                    activeOpacity={0.8}
                         key={i}
                         style={[
                             styles.weekButton,
@@ -269,6 +271,7 @@
                         <View key={rowIndex} style={styles.row}>
                             {row.map(day => ( 
                             <TouchableOpacity
+                                activeOpacity={0.8}
                                 key={day.day}
                                 style={styles.dayCard}
                                 onPress={() => navigation.navigate('WorkoutDayScreen', { day })}

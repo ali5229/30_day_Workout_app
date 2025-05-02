@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ImageBackground } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase/firebaseConfig';
@@ -51,7 +51,7 @@ const GoalSelection = ({route , navigation}:{route:any, navigation:any}) => {
 
 
   return (
-    <View style={styles.container}>
+    <ImageBackground source={require('../../assets/Images/RegisterScreen.jpg')} style={styles.container}>
       <Text style={styles.title}>Select Your Goal</Text>
       <Text style={styles.subtitle}>Your BMI: {bmi}</Text>
       <Text style={styles.subtitle}>Recomended Goal : {recommendedGoal}</Text>
@@ -61,17 +61,20 @@ const GoalSelection = ({route , navigation}:{route:any, navigation:any}) => {
         items= {goalOptions}
         value= {goal}
         placeholder={{ label:'Select A Goal', value: null}}
-        style={pickerStyle}
+        style={pickerSelectStyles}
       />
     {loading ? (
-         <ActivityIndicator size="large" color="blue" />
+      <TouchableOpacity style= {styles.button}>
+      <Text style={styles.buttonText}><ActivityIndicator size="large" color="#fff" /></Text>
+    </TouchableOpacity>
+         
     ):(
 
       <TouchableOpacity style= {styles.button} onPress={saveGoal}>
         <Text style={styles.buttonText}>Confirm Goal</Text>
       </TouchableOpacity>
     )}
-    </View>
+    </ImageBackground>
   )
 
 };
@@ -89,52 +92,54 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#fff',
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 10,
+    color: '#fff',
   },
   button: {
     width: '100%',
-    height: 40,
-    backgroundColor: '#007bff',
+    height: 45,
+    backgroundColor: 'transparent',
+    borderColor: '#fff',
+    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 5,
-    marginTop: 20,
+    borderRadius: 8,
+    marginBottom: 15,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
   },
 
 });
 
-const pickerStyle = StyleSheet.create({
+const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
     width: '100%',
     height: 40,
-    borderColor: '#ccc',
+    borderColor: '#fff',
     borderWidth: 1,
     borderRadius: 5,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     marginBottom: 15,
     paddingHorizontal: 10,
-    color: '#000',
+    color: '#fff',
   },
-  inputAndroid:{
-    
+  inputAndroid: {
     width: '100%',
     height: 50,
-    borderColor: '#ccc',
-    borderWidth: 1,
+    borderColor: '#fff',
+    borderWidth: 5,
     borderRadius: 5,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     marginBottom: 15,
     paddingHorizontal: 10,
-    color: '#000',
-  }
+    color: '#fff',
+  },
 
 });
 

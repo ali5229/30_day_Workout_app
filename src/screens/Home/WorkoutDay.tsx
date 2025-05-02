@@ -6,12 +6,12 @@ export default function WorkoutDayScreen({ route, navigation }: { route: any, na
 
   return (
     <ScrollView style={styles.container}>
+      <View style={{flex:1, flexDirection:'row'}}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Image source={require('../../assets/Images/previous.png')} style={styles.previousBtn} ></Image>
-        <Text style={styles.backText}>Back</Text>
+        <Image source={require('../../assets/Images/Back.png')} style={styles.previousBtn} ></Image>
       </TouchableOpacity>
-
       <Text style={styles.header}>Day {day.day}</Text>
+      </View>
 
       {day.exercises.length ? (
         day.exercises.map((exercise: {
@@ -22,6 +22,7 @@ export default function WorkoutDayScreen({ route, navigation }: { route: any, na
           videoUrl?: string; // optional if not all have video
         }, index: number) => (
           <TouchableOpacity
+            activeOpacity={0.7}
             key={index}
             style={styles.exerciseCard}
             onPress={() => navigation.navigate('ExerciseDetailScreen', {
@@ -50,7 +51,7 @@ const styles = StyleSheet.create({
   container: { 
     padding: 16, backgroundColor: '#fff', flex: 1, },
   backButton: { marginBottom: 12 , flexDirection: 'row', alignItems: 'center' },
-  previousBtn: { width: 20, height: 20, marginRight: 8 , transform: [{ rotateY: '180deg' }] },
+  previousBtn: { width: 30, height: 30, marginRight: 8 , transform: [{ rotateY: '180deg' }] },
   backText: { fontSize: 16, color: '#007AFF' },
   header: { fontSize: 22, fontWeight: 'bold', marginBottom: 16 },
   exerciseCard: {

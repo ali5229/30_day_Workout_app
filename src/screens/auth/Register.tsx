@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, ImageBackground } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select'; 
 import {authService} from '../../services/authService';
 
@@ -82,13 +82,14 @@ const RegisterPage = ({ navigation }: { navigation: any }) => {
 
   return (
     <ScrollView>
-    <View style={styles.container}>
+    <ImageBackground 
+        source={require('../../assets/Images/RegisterScreen.jpg')} style={styles.container}>
       <Text style={styles.title}>Register for PWFA</Text>
 
       <TextInput
         style={styles.input}
         placeholder="Email"
-        placeholderTextColor="#999"
+        placeholderTextColor="#fff"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -98,7 +99,7 @@ const RegisterPage = ({ navigation }: { navigation: any }) => {
       <TextInput
         style={styles.input}
         placeholder="Password"
-        placeholderTextColor="#999"
+        placeholderTextColor="#fff"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -108,7 +109,7 @@ const RegisterPage = ({ navigation }: { navigation: any }) => {
       <TextInput
         style={styles.input}
         placeholder="Age"
-        placeholderTextColor="#999"
+        placeholderTextColor="#fff"
         value={age}
         onChangeText={setAge}
         keyboardType="numeric"
@@ -117,7 +118,7 @@ const RegisterPage = ({ navigation }: { navigation: any }) => {
       <TextInput
         style={styles.input}
         placeholder="Height (cm)"
-        placeholderTextColor="#999"
+        placeholderTextColor="#fff"
         value={height}
         onChangeText={setHeight}
         keyboardType="numeric"
@@ -126,7 +127,7 @@ const RegisterPage = ({ navigation }: { navigation: any }) => {
       <TextInput
         style={styles.input}
         placeholder="Weight (kg)"
-        placeholderTextColor="#999"
+        placeholderTextColor="#fff"
         value={weight}
         onChangeText={setWeight}
         keyboardType="numeric"
@@ -169,7 +170,9 @@ const RegisterPage = ({ navigation }: { navigation: any }) => {
       />
 
 {loading ? (
-        <ActivityIndicator size="large" color="blue" /> 
+        <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}><ActivityIndicator size="large" color="#fff" /></Text>
+      </TouchableOpacity>
       ) : (
         
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
@@ -177,10 +180,10 @@ const RegisterPage = ({ navigation }: { navigation: any }) => {
     </TouchableOpacity>
       )}
 
-      <TouchableOpacity onPress={() => navigation.navigate('SignInScreen')}>
+      <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
         <Text style={styles.registerText}>Already have an account? Sign In</Text>
       </TouchableOpacity>
-    </View>
+    </ImageBackground>
     </ScrollView>
   );
 };
@@ -189,24 +192,24 @@ const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
     width: '100%',
     height: 40,
-    borderColor: '#ccc',
+    borderColor: '#fff',
     borderWidth: 1,
     borderRadius: 5,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     marginBottom: 15,
     paddingHorizontal: 10,
-    color: '#000',
+    color: '#fff',
   },
   inputAndroid: {
     width: '100%',
     height: 50,
-    borderColor: '#ccc',
-    borderWidth: 1,
+    borderColor: '#fff',
+    borderWidth: 5,
     borderRadius: 5,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     marginBottom: 15,
     paddingHorizontal: 10,
-    color: '#000',
+    color: '#fff',
   },
 });
 
@@ -222,41 +225,44 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#fff',
   },
   input: {
     width: '100%',
     height: 40,
-    borderColor: '#ccc',
+    borderColor: 'rgba(255,255,255,0.5)',
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 15,
-    backgroundColor: '#fff',
-    color: '#000',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: '#fff',
   },
   label: {
     alignSelf: 'flex-start',
     fontSize: 14,
     marginBottom: 5,
-    color: '#333',
+    color: '#fff',
   },
   button: {
     width: '100%',
-    height: 40,
-    backgroundColor: '#007bff',
+    height: 45,
+    backgroundColor: 'transparent',
+    borderColor: '#fff',
+    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 5,
+    borderRadius: 8,
     marginBottom: 15,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
   },
   registerText: {
-    color: '#007bff',
+    color: '#fff',
     fontSize: 14,
+    textAlign: 'center',
     textDecorationLine: 'underline',
   },
 });

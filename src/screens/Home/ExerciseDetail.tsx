@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text,Image, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { Video } from 'react-native-video';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import {app} from '../../firebase/firebaseConfig';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 
 export default function ExerciseDetailScreen({ route, navigation }: { route: any, navigation: any }) {
-  
-  const { exercise, index, day } = route.params as any;
 
+  const { exercise, index, day } = route.params as any;
   const isFirst = index === 0;
   const isLast = index === day.exercises.length - 1;
-
   const [instruction, setInstruction] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
-
   const db = getFirestore(app);
 
   useEffect(() => {
@@ -57,135 +55,175 @@ export default function ExerciseDetailScreen({ route, navigation }: { route: any
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator color="#fff" />
+        <ActivityIndicator color="blue"  />
       </View>
     );
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Image source={require('../../assets/Images/previous.png')} style={styles.previousBtn} ></Image>
-              <Text style={styles.backText}>Back</Text>
-            </TouchableOpacity>
+  {/* Header */}
+  <View style={styles.headerContainer}>
+    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+      <Image source={require('../../assets/Images/Back.png')} style={{ width: 24, height: 24, transform: [{ rotateY: '180deg' }] }} />
+    </TouchableOpacity>
+    <Text style={styles.headerText}>{exercise.name}</Text>
+  </View>
 
-      {/* Video */}
-      <View style={styles.videoView}>
-      {videoUrl ? (
-        <Video
-          source={{ uri: videoUrl }}
-          style={styles.video}
-          resizeMode="cover"
-          repeat
-          muted={false}
-          controls={false}
-        />
-      ) : (
-        <Text style={{ color: '#000' }}>No video available</Text>
-      )}
+  {/* Video Section */}
+  <View style={styles.videoCard}>
+    {videoUrl ? (
+      <Video
+        source={{ uri: videoUrl }}
+        style={styles.video}
+        resizeMode="cover"
+        repeat
+        muted
+      />
+    ) : (
+      <Text style={styles.noVideoText}>No video available</Text>
+    )}
+  </View>
 
-      </View>
+  {/* Info Section */}
+  <View style={ { flex:1, flexDirection: 'row', justifyContent:'space-evenly'}}>
+  <View style={styles.statsCard}>
+    <Image source={require('../../assets/Images/sets.png')} style={{ width: 40, height: 40, marginRight: 8 }} />
+    <Text style={styles.statsText}>{exercise.sets} Sets</Text>
+  </View>
+  <View style={styles.statsCard}>
+    <Image source={require('../../assets/Images/reps.png')} style={{ width: 40, height: 40, marginRight: 8 }} />
+    <Text style={styles.statsText}>{exercise.reps} Reps</Text>
+  </View>
+  </View>
+  {/* Instructions */}
+  <View style={styles.instructionCard}>
+    <Text style={styles.sectionTitle}>How to Perform</Text>
+    <Text style={styles.instructionText}>{instruction}</Text>
+  </View>
 
-      {/* Exercise Name */}
-      {/* Sets, Reps */}
-      <Text style={styles.setsReps}>{exercise.sets} Sets × {exercise.reps} Reps</Text>
+  {/* Navigation */}
+  <View style={styles.navContainer}>
+    {!isFirst && (
+      <TouchableOpacity onPress={() => goToExercise('previous')} style={styles.navButton}>
+        <Image source={require('../../assets/Images/Next.png')} style={{ width: 20, height: 20, transform: [{ rotateY: '180deg' }] }} />
+        <Text style={styles.navButtonText}>Previous</Text>
+      </TouchableOpacity>
+    )}
+    {!isLast ? (
+      <TouchableOpacity onPress={() => goToExercise('next')} style={styles.navButton}>
+        <Text style={styles.navButtonText}>Next</Text>
+        <Image source={require('../../assets/Images/Next.png')} style={{ width: 20, height: 20 }} />
+      </TouchableOpacity>
+    ) : (
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.navButtonDone}>
+        <Text style={styles.navButtonText}>Mark Done</Text>
+        <Image source={require('../../assets/Images/tick2.png')} style={{ width: 30, height: 30 }} />
+      </TouchableOpacity>
+    )}
+  </View>
+</ScrollView>
 
-      {/* Instructions */}
-      <View style={styles.instructionView}>
-      <Text style={styles.instruction}>{instruction}</Text>
-      </View>
-      {/* Navigation Buttons */}
-      <View style={styles.navButtonsContainer}>
-      <View style={styles.navButtons}>
-        {!isFirst && (
-          <TouchableOpacity onPress={() => goToExercise('previous')} style={styles.navButton}>
-            <Image source={require('../../assets/Images/previous.png')} style={styles.previousBtn} ></Image>
-            <Text style={styles.navButtonText}> Previous</Text>
-          </TouchableOpacity>
-        )}
-        {!isLast ? (
-          <TouchableOpacity onPress={() => goToExercise('next')} style={styles.navButton}>
-            <Image source={require('../../assets/Images/previous.png')} style={styles.nextBtn} ></Image>
-            <Text style={styles.navButtonText}>Next</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.navButton}>
-            <Image source={require('../../assets/Images/previous.png')} style={styles.nextBtn} ></Image>
-            <Text style={styles.navButtonText}>End</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-      </View>
-    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    backgroundColor: '#F7F9FC',
     flexGrow: 1,
-    flexDirection: 'column',
-  }, 
-  backButton: { marginBottom: 12 , flexDirection: 'row', alignItems: 'center' },
-  previousBtn: { width: 20, height: 20, marginRight: 8 , transform: [{ rotateY: '180deg' }] },
-  nextBtn: { width: 20, height: 20, marginRight: 8 },
-  backText: { fontSize: 16, color: '#007AFF' },
-  videoView:{
-    width: '100%',
-    height: 320,
-    borderRadius: 12,
-    justifyContent: 'center',
+  },
+  headerContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 20,
+  },
+  backButton: {
+    marginRight: 12,
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#222',
+  },
+  videoCard: {
+    overflow: 'hidden',
+    elevation: 3,
+    marginBottom: 20,
+    backgroundColor: '#000',
   },
   video: {
     width: '100%',
-    height: 320,
-    borderRadius: 12,
-    backgroundColor: '#000',
+    height: 260,
   },
-  setsReps: {
-    fontSize: 25,
-    marginVertical: 12,
+  noVideoText: {
+    color: '#fff',
+    padding: 20,
     textAlign: 'center',
   },
-  instruction: {
-    fontSize: 16,
-    marginBottom: 24,
-    color: 'white',
+  statsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    
+    alignSelf: 'center',
+    marginBottom: 20,
   },
-  instructionView: {
+  statsText: {
+    color: '#fff',
+    padding: 15,
+    backgroundColor: '#3C91E6',
+    fontSize: 18,
+    elevation: 5,
+    fontWeight: 'bold',
+  },
+  instructionCard: {
     backgroundColor: '#087E8B',
-    padding: 10,
-    height: 200,
     borderRadius: 12,
-    boxShadow: '0 4px 8px rgba(10, 10, 10, 0.5)',
+    padding: 16,
+    marginBottom: 20,
   },
-  navButtons: {
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  instructionText: {
+    color: '#E0F7FA',
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  navContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  navButtonsContainer: {
-    height: 130,
-    flexDirection: 'column',
-    justifyContent: 'flex-end',
-    
+    marginTop: 'auto',
   },
   navButton: {
-    padding: 12,
-    width: '35%',
-    backgroundColor: '#1e1e1e',
-    borderRadius: 8,
     flexDirection: 'row',
-    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#087E8B',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 30,
+    width: '45%',
+    justifyContent: 'space-evenly',
+    elevation: 2,
   },
+  navButtonDone: {
+
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#86CD82',
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    width: '45%',
+    justifyContent: 'space-evenly',
+    elevation: 2,
+  },
+
   navButtonText: {
     color: '#fff',
-  },
-  endText: {
-    color: '#0f0',
     fontSize: 16,
-    textAlign: 'center',
-    marginTop: 10,
+    fontWeight: '600',
   },
 });
