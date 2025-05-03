@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,65 +8,22 @@ import {
   ImageBackground,
   ActivityIndicator,
   Alert,
-  Animated,
-  Dimensions,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  TouchableWithoutFeedback,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/Auth';
-
-const MESSAGES = [
-  '',
-  'Personalized Plans',
-  'Now for Diabetes Type 1 patients',
-  'Variety Of Exercises',
-  'Weekly Inspections',
-  'Progress Calculation',
-  'Get In Shape Now!',
-];
-
-const screenHeight = Dimensions.get('window').height;
 
 const Signin = ({ navigation }: { navigation: any }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [visibleMessages, setVisibleMessages] = useState<string[]>([]);
-
-  const fadeAnims = useRef(MESSAGES.map(() => new Animated.Value(0))).current;
-  const messageOffsets = useRef(MESSAGES.map(() => new Animated.Value(0))).current;
 
   const auth = useAuth();
-
-  useEffect(() => {
-    let index = 0;
-
-    const showMessage = () => {
-      if (index < MESSAGES.length) {
-        setVisibleMessages((prev) => [...prev, MESSAGES[index]]);
-
-        Animated.timing(fadeAnims[index], {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }).start();
-
-        for (let i = 0; i <= index; i++) {
-          Animated.timing(messageOffsets[i], {
-            toValue: -30 * (index - i),
-            duration: 800,
-            useNativeDriver: true,
-          }).start();
-        }
-
-        index++;
-        setTimeout(showMessage, 4000);
-      }
-    };
-
-    showMessage();
-  }, []);
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -86,73 +43,73 @@ const Signin = ({ navigation }: { navigation: any }) => {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    style={{ flex: 1 }}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  >
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ImageBackground
         source={require('../../assets/Images/SignInScreen.jpg')}
         style={styles.background}
       >
         <SafeAreaView style={styles.container}>
-          {/* Animated Messages */}
-          <View style={styles.animatedTextContainer}>
-            {visibleMessages.map((msg, i) => (
-              <Animated.View
-                key={i}
-                style={{
-                  opacity: fadeAnims[i],
-                  transform: [{ translateY: messageOffsets[i] }],
-                  position: 'absolute',
-                  width: '100%',
-                }}
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false} 
+          >
+            <View style={styles.headerContainer}>
+              <Image
+                source={require('../../assets/Images/Logo/logo1.png')}
+                style={styles.logo}
+              />
+              <Text style={styles.title}>Welcome Back</Text>
+              <Text style={styles.subtitle}>Let’s crush your fitness goals</Text>
+            </View>
+
+            <View style={styles.formContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor="#fff"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="#fff"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleSignIn}
+                disabled={loading}
               >
-                <Text style={styles.animatedText}>{msg}</Text>
-              </Animated.View>
-            ))}
-          </View>
-
-          {/* Sign-In Form */}
-          <View style={styles.formContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor="#fff"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#fff"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-
-            {loading ? (
-              <TouchableOpacity style={styles.button} >
-              <Text style={styles.buttonText}><ActivityIndicator size="large" color="#fff" /></Text>
-            </TouchableOpacity>
-              
-            ) : (
-              <TouchableOpacity style={styles.button} onPress={handleSignIn}>
-                <Text style={styles.buttonText}>Sign In</Text>
+                {loading ? (
+                  <ActivityIndicator size="large" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Sign In</Text>
+                )}
               </TouchableOpacity>
-            )}
 
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.registerText}>
-                Don't have an account? Register
-              </Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                <Text style={styles.registerText}>
+                  Don't have an account? Register
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </SafeAreaView>
       </ImageBackground>
-    </KeyboardAvoidingView>
-  );
+    </TouchableWithoutFeedback>
+  </KeyboardAvoidingView>
+);
 };
 
 const styles = StyleSheet.create({
@@ -162,22 +119,33 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 20,
     paddingVertical: 40,
   },
-  animatedTextContainer: {
-    height: screenHeight / 3,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    position: 'relative',
+  headerContainer: {
+
   },
-  animatedText: {
-    fontSize: 22,
-    fontWeight: 'bold',
+  logo: {
+    width: 400,
+    height: 400,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
     color: '#fff',
-    fontStyle: 'italic',
     textAlign: 'center',
+    fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 20,
+    fontStyle: 'italic',
   },
   formContainer: {
     justifyContent: 'center',

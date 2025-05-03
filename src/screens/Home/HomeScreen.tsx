@@ -4,6 +4,8 @@
     import { useAuth } from "../../context/Auth";
     import asyncStorage from "@react-native-async-storage/async-storage";
     import {LottieAnimation} from "../../components/lottieAnimation";
+    import { NavigationContainer } from '@react-navigation/native';
+    import MainTabNavigator from '../../routes/AppNavigator'; 
     
     interface Exercise {
         name: string;
@@ -28,7 +30,6 @@
             const [workoutPlan, setWorkoutPlan] = useState<WorkoutDay[]>([]);
             const [planGeneratedAt, setPlanGeneratedAt] = useState<Date | null>(null);
             const [todayWorkoutDay, setTodayWorkoutDay] = useState<number | null>(null);
-            const [selectedDay, setSelectedDay] = useState<number | null>(null);            
             const [currentWeek, setCurrentWeek] = useState(1);
             const [weeksInMonth] = useState(4);
             
@@ -224,7 +225,7 @@
                     onPress={() => {
                         const todayWorkout = workoutPlan.find(d => d.day === todayWorkoutDay);
                         if (todayWorkout) {
-                          navigation.navigate('WorkoutDayScreen', { day: todayWorkout });
+                          navigation.navigate('WorkoutDayScreen', { day: todayWorkout, todayWorkoutDay });
                         }
                       }}
                 >   <ImageBackground
@@ -274,7 +275,7 @@
                                 activeOpacity={0.8}
                                 key={day.day}
                                 style={styles.dayCard}
-                                onPress={() => navigation.navigate('WorkoutDayScreen', { day })}
+                                onPress={() => navigation.navigate('WorkoutDayScreen', { day, todayWorkoutDay })}
                             > 
                             
                              
@@ -296,6 +297,7 @@
         </View>  
                
             </ScrollView>
+            
         );
     };
  

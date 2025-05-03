@@ -2,8 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image,ImageBackground } from 'react-native';
 
 export default function WorkoutDayScreen({ route, navigation }: { route: any, navigation: any }) {
-  const { day } = route.params;
-
+  const { day, todayWorkoutDay } = route.params || {};
   return (
     <ScrollView style={styles.container}>
       <View style={{flex:1, flexDirection:'row'}}>
@@ -29,6 +28,7 @@ export default function WorkoutDayScreen({ route, navigation }: { route: any, na
               exercise,
               index,
               day,
+              todayWorkoutDay
             })}
           > <ImageBackground
             source={require('../../assets/Images/exerciseCard.jpg')} 

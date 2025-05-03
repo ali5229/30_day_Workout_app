@@ -8,8 +8,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function ExerciseDetailScreen({ route, navigation }: { route: any, navigation: any }) {
 
-  const { exercise, index, day } = route.params as any;
+  const { exercise, index, day, todayWorkoutDay } = route.params as any;
   const isFirst = index === 0;
+  console.log(todayWorkoutDay)
+  console.log(day.day)
   const isLast = index === day.exercises.length - 1;
   const [instruction, setInstruction] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string>('');
@@ -49,6 +51,7 @@ export default function ExerciseDetailScreen({ route, navigation }: { route: any
       exercise: newExercise,
       index: newIndex,
       day,
+      todayWorkoutDay
     });
   };
 
@@ -111,16 +114,16 @@ export default function ExerciseDetailScreen({ route, navigation }: { route: any
       </TouchableOpacity>
     )}
     {!isLast ? (
-      <TouchableOpacity onPress={() => goToExercise('next')} style={styles.navButton}>
-        <Text style={styles.navButtonText}>Next</Text>
-        <Image source={require('../../assets/Images/Next.png')} style={{ width: 20, height: 20 }} />
+  <TouchableOpacity onPress={() => goToExercise('next')} style={styles.navButton}>
+    <Text style={styles.navButtonText}>Next</Text>
+    <Image source={require('../../assets/Images/Next.png')} style={{ width: 20, height: 20 }} />
       </TouchableOpacity>
-    ) : (
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.navButtonDone}>
-        <Text style={styles.navButtonText}>Mark Done</Text>
-        <Image source={require('../../assets/Images/tick2.png')} style={{ width: 30, height: 30 }} />
-      </TouchableOpacity>
-    )}
+        ) : todayWorkoutDay==day.day ? (
+  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.navButtonDone}>
+    <Text style={styles.navButtonText}>Mark Done</Text>
+    <Image source={require('../../assets/Images/tick2.png')} style={{ width: 30, height: 30 }} />
+  </TouchableOpacity>
+) : null}
   </View>
 </ScrollView>
 
