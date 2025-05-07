@@ -1,11 +1,9 @@
     import { Alert, Text, View, ImageBackground,ScrollView, TouchableOpacity, StyleSheet } from "react-native";
     import firestore, { Timestamp } from '@react-native-firebase/firestore';
-    import React, { useState, useEffect } from 'react';
+    import React, { useState, useEffect, useLayoutEffect } from 'react';
     import { useAuth } from "../../context/Auth";
     import asyncStorage from "@react-native-async-storage/async-storage";
     import {LottieAnimation} from "../../components/lottieAnimation";
-    import { NavigationContainer } from '@react-navigation/native';
-    import MainTabNavigator from '../../routes/AppNavigator'; 
     
     interface Exercise {
         name: string;
@@ -33,6 +31,13 @@
             const [currentWeek, setCurrentWeek] = useState(1);
             const [weeksInMonth] = useState(4);
             
+            useLayoutEffect(() => {
+                navigation.setOptions({
+                  tabBarStyle: loading ? { display: 'none' } : undefined,
+                });
+              }, [loading]);
+
+              
             useEffect(() => {
                 const fetchPlan = async()=>{
 

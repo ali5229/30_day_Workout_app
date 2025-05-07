@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text,Image, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text,Image, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Video } from 'react-native-video';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs,doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import {app} from '../../firebase/firebaseConfig';
-import Icon from 'react-native-vector-icons/Ionicons';
-
+import { useAuth } from '../../context/Auth';
 
 export default function ExerciseDetailScreen({ route, navigation }: { route: any, navigation: any }) {
 
   const { exercise, index, day, todayWorkoutDay } = route.params as any;
   const isFirst = index === 0;
-  console.log(todayWorkoutDay)
-  console.log(day.day)
   const isLast = index === day.exercises.length - 1;
+  const { authData } = useAuth();
+  const userId = authData?.userId;
   const [instruction, setInstruction] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [markStatus, setMarkStatus] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
   const db = getFirestore(app);
 
   useEffect(() => {
@@ -33,6 +34,16 @@ export default function ExerciseDetailScreen({ route, navigation }: { route: any
           setVideoUrl(data.videoUrl);
         } else {
           console.warn(`Exercise not found in Firestore: ${exercise.name}`);
+        }
+        if(!userId) return;
+        const logRef = doc(db, 'Workout_Logs', userId);
+        const logSnap = await getDoc(logRef);
+        const dayKey = `day${day.day}`;
+        if (logSnap.exists()) {
+          const logData = logSnap.data();
+          if (logData[dayKey] === 'Completed') {
+            setMarkStatus(true);
+          }
         }
       } catch (err) {
         console.error('Error fetching exercise details:', err);
@@ -54,6 +65,48 @@ export default function ExerciseDetailScreen({ route, navigation }: { route: any
       todayWorkoutDay
     });
   };
+
+  const addWorkout = async ()=>{
+    setSaving(true);
+      if(!userId) return;
+      try{
+        const userDocRef = doc(db, 'users', userId);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if(userDocSnap.exists()){
+            const userData = userDocSnap.data();
+            const currentCount = userData.workoutsCompleted || 0;
+            await updateDoc(userDocRef,{
+              workoutsCompleted: currentCount + 1 
+            });
+        } else{
+          await setDoc(userDocRef, {
+            workoutsCompleted : 1
+          }, {merge:true})
+        }
+        const logRef = doc(db, 'Workout_Logs', userId);
+        const logSnap = await getDoc(logRef);
+        const dayKey = `day${day.day}`;
+        if(logSnap.exists()){
+          await updateDoc(logRef,{
+              [dayKey]:'Completed'
+          });
+        } else{
+          await setDoc(logRef,{
+            userId,
+            [dayKey]: 'Completed'
+          });
+        }
+        Alert.alert("Success","Workout marked as completed.")
+        
+      } catch(error){
+        console.error("Unable to save workout", error);
+        Alert.alert("Error","Failed To mark workout as done")
+      }
+      setMarkStatus(true);
+      setSaving(false);
+  }
+
 
   if (loading) {
     return (
@@ -119,10 +172,22 @@ export default function ExerciseDetailScreen({ route, navigation }: { route: any
     <Image source={require('../../assets/Images/Next.png')} style={{ width: 20, height: 20 }} />
       </TouchableOpacity>
         ) : todayWorkoutDay==day.day ? (
-  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.navButtonDone}>
-    <Text style={styles.navButtonText}>Mark Done</Text>
-    <Image source={require('../../assets/Images/tick2.png')} style={{ width: 30, height: 30 }} />
-  </TouchableOpacity>
+          markStatus ? (
+            <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.navButtonDone, { backgroundColor: 'blue', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
+              <Text style={[styles.navButtonText, { color: 'white', marginRight: 8 }]}>Completed</Text>
+              <Image source={require('../../assets/Images/tick2.png')} style={{ width: 30, height: 30 }} />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={() => addWorkout()} style={styles.navButtonDone} disabled={saving}>{saving ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <>
+                <Text style={styles.navButtonText}>Mark Done</Text>
+                <Image source={require('../../assets/Images/tick2.png')} style={{ width: 30, height: 30 }} />
+              </>
+            )}
+            </TouchableOpacity>
+          )
 ) : null}
   </View>
 </ScrollView>
