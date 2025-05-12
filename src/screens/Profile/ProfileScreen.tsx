@@ -11,11 +11,14 @@ export default function WorkoutScreen() {
   const email = authData?.email;
   const userId = authData?.userId; 
   const [userWeight, setUserWeight] = useState(0);
+  const [currentWeight, setCurrentWeight] = useState(0);
   const [workoutsCompleted, setWorkoutsCompleted] = useState(0);
   const [goal, setGoal] = useState('');
   const [joinedDate, setJoinedDate] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
   const auth = useAuth();
+  const [weekCheckIns, setWeekCheckIns] =useState(0);
+  
   const formatDate = (date: Date | null) => {
     if (!date) return '';
     return date.toLocaleDateString('en-US', {
@@ -36,19 +39,50 @@ export default function WorkoutScreen() {
     }
   
   };
+  
   useEffect(() => {
     setLoading(true);
     const fetchUserData = async () => {
       try {
         if (!userId) return;
         const userDoc = await firestore().collection('users').doc(userId).get();
-  
+        const checkinDoc = await firestore().collection('weeklyCheckIns').doc(userId).get();
         if (userDoc.exists) {
           const data = userDoc.data();
           setWorkoutsCompleted(data?.workoutsCompleted || 0);
           setGoal(data?.goal || '');
           setJoinedDate(data?.createdAt?.toDate?.() ?? new Date());
           setUserWeight(data?.weight || 0);
+          if (checkinDoc.exists) {
+              const checkData = checkinDoc.data();
+
+              if (checkData) {
+
+                const weeks = Object.keys(checkData);
+                setWeekCheckIns(weeks.length);
+                if (weeks.length > 0) {
+                  const sortedWeeks = weeks.sort((a, b) => {
+                    const aNum = parseInt(a.replace('week', ''), 10);
+                    const bNum = parseInt(b.replace('week', ''), 10);
+                    return bNum - aNum; // latest week first
+                  });
+
+                  const latestWeek = sortedWeeks[0];
+                  const latestEntries = checkData[latestWeek];
+                  const lastEntry = latestEntries?.[latestEntries.length - 1];
+
+                  setCurrentWeight(lastEntry?.weight || data?.weight || 0);
+                } else {
+                  setCurrentWeight(data?.weight || 0);
+                }
+              } else {
+                setCurrentWeight(data?.weight || 0);
+              }
+            }else {
+                setCurrentWeight(data?.weight || 0);
+              }
+
+
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -122,6 +156,15 @@ export default function WorkoutScreen() {
         </View>
         <Image source={require('../../assets/Images/profile_calendar.png')} style={[styles.cardIcon,{height:130}]} />
         </View>
+
+         <View style={[styles.card, {backgroundColor:'#DAE2DF'}]}>
+      <View style={styles.cardTextContent}>
+        <Text style={styles.cardTitle}>Weekly Check-Ins Completed</Text>
+        <Text style={styles.cardData}>{weekCheckIns}</Text>
+        </View>
+        <Image source={require('../../assets/Images/weekly_check.png')} style={[styles.cardIcon,{height:130}]} />
+        </View>
+
         <View style={{flexDirection:'row',justifyContent:'space-between',padding:10, borderTopWidth:1, borderBottomWidth:1, borderColor:'#E5E7EB'}}>
            <View style={[styles.weightComparison,{borderRightWidth:1}]}>
             <Text style={{fontWeight:'bold', color:'#028090'}}>STARTED</Text>
@@ -129,11 +172,11 @@ export default function WorkoutScreen() {
            </View>
            <View style={[styles.weightComparison,{borderRightWidth:1}]}>
             <Text style={{fontWeight:'bold', color:'#9376E9'}}>CURRENT</Text>
-            <Text style={styles.weightComparisonText}>{userWeight}<Text style={{fontSize:15, fontWeight:'black'}}>kg</Text></Text>
+            <Text style={styles.weightComparisonText}>{currentWeight}<Text style={{fontSize:15, fontWeight:'black'}}>kg</Text></Text>
            </View>
            <View style={styles.weightComparison}>
             <Text style={{fontWeight:'bold', color:'#F45B69'}}>LOSS/GAIN</Text>
-            <Text style={styles.weightComparisonText}>{userWeight-userWeight}<Text style={{fontSize:15, fontWeight:'black'}}>kg</Text></Text>
+            <Text style={styles.weightComparisonText}>{currentWeight-userWeight}<Text style={{fontSize:15, fontWeight:'black'}}>kg</Text></Text>
            </View>
         </View>
         <ProgressChart/>

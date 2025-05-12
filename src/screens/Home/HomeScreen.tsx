@@ -55,6 +55,12 @@
                             const today = new Date();
                             const diffInTime = today.getTime() - parsedDate.getTime();
                             const dayNumber = Math.min(30, Math.max(1, Math.floor(diffInTime / (1000 * 3600 * 24)) + 1));
+
+                            if (dayNumber > 28) {
+                                navigation.navigate('PlanCompleteScreen'); // redirect on day 29+
+                                return;
+                                }
+
                             setTodayWorkoutDay(dayNumber);
                             setWorkoutPlan(JSON.parse(localData));
                             setLoading(false);
@@ -73,6 +79,11 @@
                                 const today = new Date();
                                 const diffInTime = today.getTime() - planGeneratedAt.getTime();
                                 const dayNumber = Math.min(30, Math.max(1, Math.floor(diffInTime / (1000 * 3600 * 24)) + 1));
+
+                                if (dayNumber > 28) {
+                                navigation.navigate('PlanCompleteScreen'); // redirect on day 29+
+                                return;
+                                }
 
                                 setTodayWorkoutDay(dayNumber);
                                 await asyncStorage.setItem('workoutPlan', JSON.stringify(firestoreData));
@@ -219,8 +230,7 @@
 
     return (
     <ScrollView style={styles.container}>
-                <View style={styles.content}>
-            <Text style={styles.header}>30-Day Workout Plan</Text>                
+                <View style={styles.content}>           
 
             {/* Week Selector */}
             {todayWorkoutDay && (
@@ -280,7 +290,10 @@
                                 activeOpacity={0.8}
                                 key={day.day}
                                 style={styles.dayCard}
-                                onPress={() => navigation.navigate('WorkoutDayScreen', { day, todayWorkoutDay })}
+                                onPress={() => 
+                                    day.exercises.length === 0
+                                   ? navigation.navigate('RestDayScreen')
+                                   : navigation.navigate('WorkoutDayScreen', { day, todayWorkoutDay })}
                             > 
                             
                              

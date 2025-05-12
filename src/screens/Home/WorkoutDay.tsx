@@ -36,7 +36,6 @@ export default function WorkoutDayScreen({ route, navigation }: { route: any, na
             imageStyle={styles.exerciseCardImgImage}>
             <Text style={styles.exerciseTitle}>{exercise.name}</Text>
             <Text style={styles.exerciseNum}>Sets: {exercise.sets} | Reps: {exercise.reps}</Text>
-            <Text style={styles.instructions}>{exercise.instruction}</Text>
             </ImageBackground>
           </TouchableOpacity>
         ))
