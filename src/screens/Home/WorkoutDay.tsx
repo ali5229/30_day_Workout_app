@@ -18,7 +18,7 @@ export default function WorkoutDayScreen({ route, navigation }: { route: any, na
           sets: number;
           reps: number;
           instruction: string;
-          videoUrl?: string; // optional if not all have video
+          videoUrl?: string; 
         }, index: number) => (
           <TouchableOpacity
             activeOpacity={0.7}

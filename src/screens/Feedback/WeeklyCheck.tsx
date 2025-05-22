@@ -3,17 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, Text, StyleSheet, TextInput, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { useAuth } from '../../context/Auth';
-import { useNavigation } from '@react-navigation/native';
 import { ScrollView } from 'react-native';
 
-export default function WeeklyCheckInScreen() {
+export default function WeeklyCheckInScreen({navigation}:{navigation:any}) {
   const [weight, setWeight] = useState('');
   const [feelAfterWorkout, setFeelAfterWorkout] = useState('');
   const [difficulty, setDifficulty] = useState('');
-  const [injuries, setInjuries] = useState('');
   const [weekNumber, setWeekNumber] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigation = useNavigation();
+
 
    const { authData } = useAuth(); 
   const userId = authData?.userId; 
@@ -31,7 +29,7 @@ export default function WeeklyCheckInScreen() {
   }, []);
 
   const handleSubmit = async () => {
-    if (!weight || !feelAfterWorkout || !difficulty || !injuries) {
+    if (!weight || !feelAfterWorkout || !difficulty) {
       Alert.alert('Please complete all fields.');
       return;
     }
@@ -42,7 +40,6 @@ export default function WeeklyCheckInScreen() {
         weight,
         feelAfterWorkout,
         difficulty,
-        injuries,
         timestamp: new Date(),
       };
 
@@ -57,7 +54,11 @@ export default function WeeklyCheckInScreen() {
         );
 
       Alert.alert('Success', 'Check-in submitted!');
-      navigation.goBack();
+      navigation.navigate('MainTabs', {
+              refresh: true,
+            },{
+              merge:true,
+            });
     } catch (err) {
       console.error(err);
       Alert.alert('Error', 'Could not submit check-in.');
@@ -99,17 +100,6 @@ export default function WeeklyCheckInScreen() {
           key={option}
           style={[styles.option, difficulty === option && styles.selected]}
           onPress={() => setDifficulty(option)}
-        >
-          <Text>{option}</Text>
-        </TouchableOpacity>
-      ))}
-
-      <Text style={styles.label}>Any injuries?</Text>
-      {['Yes', 'No'].map(option => (
-        <TouchableOpacity
-          key={option}
-          style={[styles.option, injuries === option && styles.selected]}
-          onPress={() => setInjuries(option)}
         >
           <Text>{option}</Text>
         </TouchableOpacity>

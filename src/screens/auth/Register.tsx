@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, ImageBackground } from 'react-native';
+import { Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, ImageBackground } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select'; 
 import {authService} from '../../services/authService';
 
@@ -133,7 +133,7 @@ const RegisterPage = ({ navigation }: { navigation: any }) => {
         keyboardType="numeric"
       />
 
-      <Text style={styles.label}>Do you have Type 1 Diabetes?</Text>
+      <Text style={styles.label}>Do you have Type 2 Diabetes?</Text>
       <RNPickerSelect
         onValueChange={(value) => setDiabetes(value)}
         items={diabetesOptions}

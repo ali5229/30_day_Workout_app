@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { View, Text, Image, StyleSheet,Platform, ActivityIndicator, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useAuth } from '../../context/Auth';
 import firestore from '@react-native-firebase/firestore';
 import { useEffect, useState } from 'react';
@@ -64,7 +64,7 @@ export default function WorkoutScreen() {
                   const sortedWeeks = weeks.sort((a, b) => {
                     const aNum = parseInt(a.replace('week', ''), 10);
                     const bNum = parseInt(b.replace('week', ''), 10);
-                    return bNum - aNum; // latest week first
+                    return bNum - aNum; 
                   });
 
                   const latestWeek = sortedWeeks[0];

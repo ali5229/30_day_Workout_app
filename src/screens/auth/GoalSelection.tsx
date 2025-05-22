@@ -9,6 +9,7 @@ import { useAuth } from '../../context/Auth';
 const GoalSelection = ({route , navigation}:{route:any, navigation:any}) => {
   const { userData, bmi } = route.params || {};
   const { userId } = userData || {};
+  const {email} = userData || {};
   const [goal,setGoal] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { setAuthData } = useAuth();
@@ -40,6 +41,8 @@ const GoalSelection = ({route , navigation}:{route:any, navigation:any}) => {
 
       setAuthData({
         userId,
+        email
+        
       });
        
      } catch(error:any){

@@ -68,7 +68,7 @@ const signUp = async({
   const authData: AuthData = {
     token,
     userId: user.uid,
-    email: user.email ?? '',
+    email: userCredential.user.email ?? '',
     name: user.displayName ?? 'Unknown User',
   };
 

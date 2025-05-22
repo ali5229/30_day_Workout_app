@@ -66,6 +66,10 @@ export default function FeedbackScreen({ navigation }: {navigation: any }) {
     checkAvailability();
   }, [userId])
 
+  const goToRegenerate = () =>{
+    navigation.navigate('RegenerateScreen');
+  }
+
   const goToWeeklyCheckIn = () => {
     navigation.navigate('WeeklyCheckInScreen');
   };
@@ -101,6 +105,14 @@ export default function FeedbackScreen({ navigation }: {navigation: any }) {
                   <Image source={require('../../assets/Images/lock_icon.png')} style={styles.cardIcon} />
                 </View>
               )}
+
+              <TouchableOpacity style={[styles.card, { backgroundColor: '#BA2C73' }]} onPress={goToRegenerate}>
+                  <View style={styles.cardTextContent}>
+                    <Text style={[styles.cardTitle, {color:'#fff'}]}>Regenerate Workout</Text>
+                    <Text style={[styles.cardData,{color:'#fff'}]}>Start a new Workout from today with modifications.</Text>
+                  </View>
+                  <Image source={require('../../assets/Images/regenerate.png')} style={styles.cardIcon} />
+                </TouchableOpacity>
 
     </ScrollView>
   );

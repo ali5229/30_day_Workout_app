@@ -3,7 +3,7 @@
     import React, { useState, useEffect, useLayoutEffect } from 'react';
     import { useAuth } from "../../context/Auth";
     import asyncStorage from "@react-native-async-storage/async-storage";
-    import {LottieAnimation} from "../../components/lottieAnimation";
+    import LottieAnimation from "../../components/lottieAnimation";
     
     interface Exercise {
         name: string;
@@ -57,7 +57,7 @@
                             const dayNumber = Math.min(30, Math.max(1, Math.floor(diffInTime / (1000 * 3600 * 24)) + 1));
 
                             if (dayNumber > 28) {
-                                navigation.navigate('PlanCompleteScreen'); // redirect on day 29+
+                                navigation.navigate('PlanCompleteScreen'); 
                                 return;
                                 }
 
@@ -81,7 +81,7 @@
                                 const dayNumber = Math.min(30, Math.max(1, Math.floor(diffInTime / (1000 * 3600 * 24)) + 1));
 
                                 if (dayNumber > 28) {
-                                navigation.navigate('PlanCompleteScreen'); // redirect on day 29+
+                                navigation.navigate('PlanCompleteScreen');
                                 return;
                                 }
 
@@ -161,7 +161,7 @@
     - BMI: ${userData.bmi}
     - Experience: ${userData.experience}
     - Equipment Availability: ${userData.gym_equipment} 
-    - Has Type 1 Diabetes?: ${userData.diabetes}
+    - Has Type 2 Diabetes?: ${userData.diabetes}
     - Goal: ${userData.goal}
     - Workout Days per Week: ${userData.workoutdays}
     - Desired Rest Days per Week: ${restDaysPerWeek}
@@ -232,7 +232,6 @@
     <ScrollView style={styles.container}>
                 <View style={styles.content}>           
 
-            {/* Week Selector */}
             {todayWorkoutDay && (
                 <TouchableOpacity
                     activeOpacity={0.8}
@@ -240,8 +239,12 @@
                     onPress={() => {
                         const todayWorkout = workoutPlan.find(d => d.day === todayWorkoutDay);
                         if (todayWorkout) {
-                          navigation.navigate('WorkoutDayScreen', { day: todayWorkout, todayWorkoutDay });
-                        }
+                                if (todayWorkout.exercises.length === 0) {
+                                navigation.navigate('RestDayScreen');
+                                } else {
+                                navigation.navigate('WorkoutDayScreen', { day: todayWorkout, todayWorkoutDay });
+                                }
+                            }
                       }}
                 >   <ImageBackground
                     source={require('../../assets/Images/todayWorkout.jpg')}
@@ -269,7 +272,6 @@
                 ))}
             </View>
 
-            {/* Workout Days for Current Week */}
             <View style={styles.weekDaysContainer}>
                     {workoutPlan
                         

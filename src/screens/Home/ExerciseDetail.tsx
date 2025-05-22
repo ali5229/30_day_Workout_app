@@ -97,7 +97,6 @@ export default function ExerciseDetailScreen({ route, navigation }: { route: any
             [dayKey]: 'Completed'
           });
         }
-        Alert.alert("Success","Workout marked as completed.")
         
       } catch(error){
         console.error("Unable to save workout", error);

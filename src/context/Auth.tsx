@@ -41,7 +41,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     
     const signOut = async () => {
         setAuthData(undefined);
-        await asyncStorage.removeItem('@AuthData');
+        await asyncStorage.multiRemove([
+  '@AuthData',
+  'workoutPlan',
+  'planGeneratedAt',
+]);
+setAuthData(undefined);
       };
 
     return (

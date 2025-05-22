@@ -27,9 +27,9 @@ const App = () => {
           <SafeAreaView  style={{ flex: 1, }}
               edges={['right', 'bottom', 'left']}>
                 
-          <AuthProvider>
-              <Router />
-          </AuthProvider>
+                <AuthProvider>
+                    <Router />
+                </AuthProvider>
          
           </SafeAreaView>
         </SafeAreaProvider>
