@@ -8,7 +8,7 @@ const SplashScreen = ({navigation}:{navigation?:any}) => {
            <StatusBar 
         translucent 
         backgroundColor="transparent" 
-        barStyle="dark-content" // or "light-content" as needed
+        barStyle="dark-content" 
       />
     <ImageBackground source={require('../../assets/Images/splash.png')} resizeMode={'cover'} style={{flex:1}}>
 

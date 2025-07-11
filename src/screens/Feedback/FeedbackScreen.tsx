@@ -76,7 +76,7 @@ export default function FeedbackScreen({ navigation }: {navigation: any }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      {/* 🟦 Top Header Card */}
+      
       <View  style={styles.headerCard}>
         <Text style={styles.headerTitle}>Feedback Page</Text>
         <Text style={styles.headerSubtitle}>Provide feedback to personalize plans</Text>

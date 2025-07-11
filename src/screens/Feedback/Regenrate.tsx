@@ -6,6 +6,10 @@ import firestore, { Timestamp } from '@react-native-firebase/firestore';
 import asyncStorage from '@react-native-async-storage/async-storage';
 import LottieAnimation from "../../components/lottieAnimation";
 
+ interface Exercise {
+        name: string;
+        instruction: string;
+    }
     interface WorkoutDay {
         day: number;
         exercises: Array<{
@@ -35,6 +39,7 @@ const Regenerate = ({navigation}:{navigation:any}) => {
   const { authData } = useAuth();
   const [loading, setLoading] = useState(false);
   const userId = authData?.userId; 
+   const [exercises, setExercises] = useState<Exercise[]>([]);
 
 
 const handleSubmit = async() =>{
@@ -72,8 +77,8 @@ const handleSubmit = async() =>{
 
        console.log("Going for regeneration");
        const userDataObj = userDoc.data();
-
-       const monthPlan = await regeneratePlan(workoutPlan,userDataObj);     
+          const exerciseList = await fetchExercises();
+       const monthPlan = await regeneratePlan(exerciseList,userDataObj);     
        await asyncStorage.setItem('workoutPlan', JSON.stringify(monthPlan));
             await asyncStorage.setItem('planGeneratedAt', new Date().toISOString());
                         await firestore().collection('users').doc(userId).update({
@@ -91,16 +96,34 @@ const handleSubmit = async() =>{
 
  }
 
+   const fetchExercises = async () => {
+                 try {
+                     const exercisesSnapshot = await firestore().collection('Exercise_Database').get();
+                     const exercisesList: Exercise[] = [];
+                     
+                     for (const doc of exercisesSnapshot.docs) {
+                         const exercise = doc.data() as Exercise;
+                         exercisesList.push({ ...exercise});
+                     }
+                     
+                     setExercises(exercisesList);
+                     return exercisesList;
+                 } catch (error: any) {
+                     Alert.alert('Error', 'Failed to fetch exercises');
+                     return [];
+                 }
+             };
 
 
 
 
 
 
- const regeneratePlan = async(currentPlan: any, userData:any)=>{
+ const regeneratePlan = async( exerciseList: Exercise[],userData: any)=>{
    setLoading(true)
    console.log('trying regenration')
   try {
+               const exerciseNames = exerciseList.map(e => e.name).join(', ');
               const restDaysPerWeek = 7-userData.workoutdays;
               const prompt = `
       Regenerate the following 28 day workout plan for a user with the following profile:
@@ -117,7 +140,7 @@ const handleSubmit = async() =>{
       Guidelines:
       - IMPORTANT! Ensure that each group of 7 days (i.e., each week) includes exactly ${userData.workoutdays} workout days and ${restDaysPerWeek} rest days. These should be clearly spread across the week, not consecutive.
     - Ensure for each week, workout days are not more than ${userData.workoutdays} days.
-      - Use ONLY these exercises: Lateral Neck Flexion, Neck Retraction Stretch, Lying Triceps Extension, Close Grid Pushups, Judo Pushups, Overhead Tricep Stretch, Tricep Kickbacks, Tricep Extension, Overhead Tricep Extension, Dips Machine, Skull Crushers, Tricep Extension With Rope, Suspended Neck Flexion, Weighted Bench Dip, Barbell Reverse Curls, Cable Hammer Curl, Cable Reverse Curls, Barbell Wrist Curl, Dumbbell Wrist Curl, Seated Wrist Flexor Stretch, Kneeling Wrist Flexor Stretch, Seated Wrist Extensor Stretch, Kneeling Wrist Extensor Stretch, Suspended Lateral Neck Flexion, Dumbbell Reverse Wrist Curl, Barbell Reverse Wrist Curl, 90 Lat Stretch, Bent Over Row, Glute Bridge Single Leg Progression, High Row, Incline Reverse Fly, Reverse Fly, Seated High Back Row, Seated Lat Pulldown, Cable Neck Extension, Seated Row, Single Arm Row, Upward Facing Dog, Dumbbell Bentover Row, Smith Bentover Row, Deadlift, T Bar Bentover Row, Russian Twist, Mountain Climber, Abdominal Crunches, Lever Neck Extension, Plank, Heel Touch, Leg Raises, Cobra Stretch, Supine Lumber Twist Left and Right, Butt Bridge, Bicycle Crunches, Flutter Kicks, Toe Touches, Side Plank Left and Right, Weighted Seated Neck Extension, Sit Ups, Cable Woodchoppers, Skill Row, Abdominal Crunch Machine, Crunch Bench, Decline Bench Situp and Twist, Hanging Leg Raises, Bodyweight Squat, Side Lying Leg Lift Left and Right, Backward Lunge, Band Resistive Neck Retraction, Donkey Kicks, Jump Squats, Calf Raises, Fire Hydrants, Pistol Squats, Sealed Leg Curl, Lying Leg Curl, Rear Leg Extension, Leg Press, Dumbbell Squats, Wall Rear Neck Bridge, Dumbbell Jump Squats, Dumbbell Plie Squat, Barbell Back Squat, Alternate Leg Push Off, Box Jumps, Forward Lunge, Goblet Squat, Kneeling Hip Flexor Stretch, Leg Crossover Stretch, Supine Hamstring Stretch, Isometric Lying Neck Bridge, Neck Extensor Stretch, Neck Flexion and Extension, Suspended Neck Extension, Arm Raises, Side Arm Raise, Rhomboid Pulls, Knee Pushup, Arm Scissors, Prone Tricep Pushup, Childs Pose, Reclined Rhomboid Squeezes, Incline Pushups, Cable Neck Flexion, Hover Pushups, Swimmer and Superman, Hyperextension, Pike Pushup, Supine Pushup, Floor Y Raises, Chin Ups, Pull Ups, Barbell Bent Over Rows, Seated Rows, Lever Neck Flexion, Shrugs, Dumbbell Lateral Raise, Dumbbell Front Raise, Reverse Snow Angels, Barbell Front Raise, Cable Seated Front Raise, Cable Standing  Shoulder Press, Dumbbell Shoulder Press, Lever Reclined Shoulder Press, Lever Shoulder Press, Weighted Neck Flexion, Smith Shoulder Press, Suspended Front Raise, Doorway Front Deltoid Stretch, Wall Front Deltoid Stretch, Cable Lateral Raise, Stretch Side Deltoid, Barbell Rear Delt Row, Cable Reverse Fly, Rear Deltoid Stretch, Pushups, Weighted Lateral Neck Flexion, Wide Arm Pushup, Hindu Pushup, Rotation Pushups, Decline Pushup, Burpees, Staggered Pushups, Box Pushup, Plyometric Pushup, Bench Press, Close Grip Bench Press, Lever Lateral Neck Flexion, Incline Bench Press, Cable Press, Decline Cable Press, Incline Cable Press, Chest Cable Fly, Incline Chest Cable Fly, Decline Chest Cable Fly, Supine Snow Angel, Dumbbell Chest Press, Dumbbell Incline Chest Press, Wall Front Neck Bridge, Dumbbell Decline Chest Press, Chest Fly, Arm Circles, Diamond Pushup, Diagonal Plank, Wide Lifted Bicep Curl, Shoulder Tap Bicep Curl, Shoulder Tap To Reach Overhead, Plank Shoulder Tap, Wall Handstand, Wall Side Neck Bridge, Dumbbell Concentration Curls, Hammer Curls, EZ Bar Curls, Preacher Curls, High Cable Bicep Curl, Reverse Grip Barbell Row, Incline Curls, Barbell Concentration Curls, Dumbbell Curl, Tricep Dips.
+     - Use ONLY these exercises: ${exerciseNames} .
       - If Gym Equipment Availability: No , Don't give exercises requiring any equipments.
       - Format the response as a valid JSON array with 28 objects.
       - Each day format: {"day": number, "exercises": [{"name": string, "sets": number, "reps": number}]}
@@ -129,7 +152,7 @@ const handleSubmit = async() =>{
               const res = await fetch('https://api.openai.com/v1/chat/completions', {
                   method: 'POST',
                   headers: {
-                      'Authorization': `Bearer ${'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'}`,
+                      'Authorization': `Bearer ${'API KEY'}`,
                       'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({

@@ -3,12 +3,12 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyCN2tA-GfaOXu8D75hunVXW1tYBO2q-Zdg',
-  authDomain: 'personalized-fitness-app.firebaseapp.com',
-  projectId: 'personalized-fitness-app',
-  storageBucket: 'personalized-fitness-app.firebasestorage.app',
-  messagingSenderId: '169179603999',
-  appId: '1:169179603999:android:392e109aec5160b620a12a',
+  apiKey: 'Your Api Key',
+  authDomain: 'Your Auth Domain',
+  projectId: 'Project ID',
+  storageBucket: 'Storage Bucket',
+  messagingSenderId: 'Message Sender ID',
+  appId: 'app Id',
 };
 
 const app = initializeApp(firebaseConfig);

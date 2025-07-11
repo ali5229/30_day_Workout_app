@@ -60,10 +60,7 @@ const WeightChart = () => {
           }
         }
 
-        // Construct final array: initialWeight + up to 3 weekly weights
         const combinedWeights = [initialWeight, ...weeklyWeights].slice(0, 4);
-
-        // Pad with 0s if less than 4 entries (to avoid NaN crash)
         while (combinedWeights.length < 4) {
           combinedWeights.push(0);
         }
@@ -95,7 +92,7 @@ const WeightChart = () => {
   };
 
   const customDotProps = (value: number) => ({
-    r: value === 0 ? "0" : "4", // hide dot if value is 0 (considered "missing")
+    r: value === 0 ? "0" : "4",
     strokeWidth: "2",
     stroke: "#a259ff",
   });
@@ -108,7 +105,7 @@ const WeightChart = () => {
         height={220}
         chartConfig={{
           ...chartConfig,
-          propsForDots: {}, // empty to prevent default override
+          propsForDots: {}, 
         }}
         bezier
         style={{

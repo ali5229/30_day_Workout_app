@@ -12,6 +12,7 @@ const CalculateBmi = (weight: string, height: string): string | null => {
 };
 
 const RegisterPage = ({ navigation }: { navigation: any }) => {
+  
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [age, setAge] = useState<string>('');
