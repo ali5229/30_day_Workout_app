@@ -180,7 +180,7 @@
             const res = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${'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'}`,
+                    'Authorization': `Bearer ${'APi Key'}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
